@@ -8,7 +8,7 @@ if not vim.loop.fs_stat(lazypath) then
   vim.fn.system({
     "git", "clone", "--filter=blob:none",
     "https://github.com/folke/lazy.nvim.git",
-    "--branch=stable", lazypath
+    "--branch=stable", lazypath,
   })
 end
 vim.opt.rtp:prepend(lazypath)
@@ -51,22 +51,48 @@ require("lazy").setup({
       vim.cmd.colorscheme("catppuccin-mocha")
     end,
   },
-  { "nvim-tree/nvim-web-devicons" },
   { "stevearc/dressing.nvim" },
-  { "nvim-lualine/lualine.nvim", config = function()
-      require("lualine").setup({ options = { theme = "catppuccin" } })
-    end
-  },
-  { "akinsho/bufferline.nvim", config = function()
-      require("bufferline").setup({ options = { separator_style = "slant" } })
-    end
-  },
   { "karb94/neoscroll.nvim", config = true },
   { "lukas-reineke/indent-blankline.nvim", main = "ibl", config = true },
   { "folke/noice.nvim", dependencies = { "MunifTanjim/nui.nvim", "rcarriga/nvim-notify" }, config = true },
 
+  -- Lualine + Bufferline
+  {
+    "nvim-lualine/lualine.nvim",
+    config = function()
+      require("lualine").setup({ options = { theme = "catppuccin" } })
+    end,
+  },
+  {
+    "akinsho/bufferline.nvim",
+    config = function()
+      require("bufferline").setup({ options = { separator_style = "slant" } })
+    end,
+  },
+
   -----------------------------------------------------------
-  -- 🏠 Dashboard (Màn hình mở đầu)
+  -- 📁 File Icons
+  -----------------------------------------------------------
+  {
+    "nvim-tree/nvim-web-devicons",
+    config = function()
+      require("nvim-web-devicons").setup({
+        override = {
+          lua = { icon = "", color = "#51a0cf", name = "Lua" },
+          js = { icon = "", color = "#f7df1e", name = "JavaScript" },
+          ts = { icon = "", color = "#3178c6", name = "TypeScript" },
+          json = { icon = "", color = "#cbcb41", name = "Json" },
+          md = { icon = "", color = "#519aba", name = "Markdown" },
+          html = { icon = "", color = "#e34c26", name = "Html" },
+          css = { icon = "", color = "#563d7c", name = "Css" },
+        },
+        default = true,
+      })
+    end,
+  },
+
+  -----------------------------------------------------------
+  -- 🏠 Dashboard
   -----------------------------------------------------------
   {
     "nvimdev/dashboard-nvim",
@@ -88,52 +114,59 @@ require("lazy").setup({
     end,
   },
 
------------------------------------------------------------
--- 📂 File Explorer (Neo-tree)
------------------------------------------------------------
-{
-  "nvim-neo-tree/neo-tree.nvim",
-  branch = "v3.x",
-  dependencies = {
-    "nvim-lua/plenary.nvim",
-    "MunifTanjim/nui.nvim",
-    "nvim-tree/nvim-web-devicons", -- ✅ thay thế nvim-material-icon
-  },
-  config = function()
-    require("neo-tree").setup({
-      enable_git_status = true,
-      enable_diagnostics = true,
-      filesystem = {
-        follow_current_file = { enabled = true },
-        filtered_items = { hide_dotfiles = false, hide_gitignored = false },
-      },
-      window = { width = 34 },
-      default_component_configs = {
-        icon = {
-          folder_closed = "",
-          folder_open = "",
-          folder_empty = "",
-          default = "",
+  -----------------------------------------------------------
+  -- 📂 Neo-tree
+  -----------------------------------------------------------
+  {
+    "nvim-neo-tree/neo-tree.nvim",
+    branch = "v3.x",
+    dependencies = {
+      "nvim-lua/plenary.nvim",
+      "MunifTanjim/nui.nvim",
+      "nvim-tree/nvim-web-devicons",
+    },
+    config = function()
+      require("neo-tree").setup({
+        close_if_last_window = true,
+        enable_git_status = true,
+        enable_diagnostics = true,
+        filesystem = {
+          follow_current_file = { enabled = true },
+          filtered_items = { hide_dotfiles = false },
+          window = { width = 34 },
         },
-      },
-    })
+        default_component_configs = {
+          icon = {
+            folder_closed = "",
+            folder_open = "",
+            folder_empty = "",
+            default = "",
+          },
+        },
+        event_handlers = {
+          {
+            event = "file_opened",
+            handler = function()
+              require("neo-tree.command").execute({ action = "close" })
+            end,
+          },
+        },
+      })
 
-    -- Keymap mở/tắt file explorer
-    vim.keymap.set("n", "<leader>e", ":Neotree toggle left<CR>", { desc = "Toggle File Explorer" })
+      vim.keymap.set("n", "<leader>e", ":Neotree toggle left<CR>", { desc = "Toggle File Explorer" })
 
-    -- Tự mở Neo-tree khi mở Neovim mà không truyền file
-    vim.api.nvim_create_autocmd("VimEnter", {
-      callback = function(data)
-        if vim.fn.isdirectory(data.file) == 1 then
-          vim.cmd("Neotree show")
-        end
-      end,
-    })
-  end,
-},
+      vim.api.nvim_create_autocmd("VimEnter", {
+        callback = function(data)
+          if vim.fn.isdirectory(data.file) == 1 then
+            vim.cmd("Neotree show")
+          end
+        end,
+      })
+    end,
+  },
 
   -----------------------------------------------------------
-  -- 🖼️ Image Preview (yêu cầu Kitty/WezTerm)
+  -- 🖼️ Image Preview
   -----------------------------------------------------------
   {
     "adelarsq/image_preview.nvim",
@@ -145,7 +178,7 @@ require("lazy").setup({
   },
 
   -----------------------------------------------------------
-  -- 🔭 Telescope (Command Palette & Search)
+  -- 🔭 Telescope
   -----------------------------------------------------------
   {
     "nvim-telescope/telescope.nvim",
@@ -178,7 +211,23 @@ require("lazy").setup({
   },
 
   -----------------------------------------------------------
-  -- 🧠 Treesitter (Highlight & Structure)
+  -- 🖥️ ToggleTerm
+  -----------------------------------------------------------
+  {
+    "akinsho/toggleterm.nvim",
+    version = "*",
+    config = function()
+      require("toggleterm").setup({
+        open_mapping = [[<leader>t]],
+        shade_terminals = true,
+        direction = "float",
+        float_opts = { border = "curved" },
+      })
+    end,
+  },
+
+  -----------------------------------------------------------
+  -- 🧠 Treesitter
   -----------------------------------------------------------
   {
     "nvim-treesitter/nvim-treesitter",
@@ -243,3 +292,9 @@ vim.keymap.set("n", "<leader>w", ":w<CR>", { desc = "Save File" })
 vim.keymap.set("n", "<leader>q", ":q<CR>", { desc = "Quit" })
 vim.keymap.set("n", "<leader>rn", ":set relativenumber!<CR>", { desc = "Toggle relative number" })
 vim.keymap.set("n", "<leader>lg", ":LazyGit<CR>", { desc = "Open LazyGit" })
+vim.keymap.set("n", "<Tab>", ":BufferLineCycleNext<CR>", { desc = "Next buffer" })
+vim.keymap.set("n", "<S-Tab>", ":BufferLineCyclePrev<CR>", { desc = "Previous buffer" })
+vim.keymap.set("n", "<leader>c", ":bdelete<CR>", { desc = "Close current buffer" })
+vim.keymap.set("v", "<C-c>", '"+y', { desc = "Copy to system clipboard" })
+vim.keymap.set("v", "<C-x>", '"+d', { desc = "Cut to system clipboard" })
+vim.keymap.set({"n", "v"}, "<C-v>", '"+p', { desc = "Paste from system clipboard" })
