@@ -1,0 +1,6 @@
+2026/06/01-22:07:36.091 1ee8f Reusing MANIFEST /home/ikiguyz/.config/obsidian/IndexedDB/app_obsidian.md_0.indexeddb.leveldb/MANIFEST-000001
+2026/06/01-22:07:36.091 1ee8f Recovering log #7
+2026/06/01-22:07:36.126 1ee8f Reusing old log /home/ikiguyz/.config/obsidian/IndexedDB/app_obsidian.md_0.indexeddb.leveldb/000007.log 
+2026/06/01-22:07:36.214 1ee8f Level-0 table #12: started
+2026/06/01-22:07:36.242 1ee8f Level-0 table #12: 1841525 bytes OK
+2026/06/01-22:07:36.246 1ee8f Delete type=0 #7
